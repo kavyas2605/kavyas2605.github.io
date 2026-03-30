@@ -1,0 +1,282 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Personality Analyzer</title>
+
+<style>
+:root {
+    --primary:#6366f1;
+    --bg:#eef2f7;
+    --card:#ffffff;
+    --text:#222;
+}
+
+body {
+    margin:0;
+    font-family:'Poppins',sans-serif;
+    background:linear-gradient(135deg,#eef2f7,#e0e7ff);
+    color:var(--text);
+    transition:0.4s;
+}
+
+/* NAVBAR */
+.nav {
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    padding:15px 25px;
+    backdrop-filter:blur(10px);
+    background:rgba(255,255,255,0.6);
+}
+
+.controls button {
+    margin-left:10px;
+}
+
+/* CONTAINER */
+.container {
+    max-width:650px;
+    margin:40px auto;
+    padding:25px;
+    border-radius:20px;
+    background:var(--card);
+    box-shadow:0 15px 40px rgba(0,0,0,0.1);
+    animation:fade 0.6s ease;
+}
+
+/* PROGRESS */
+.progress-bar {
+    height:8px;
+    background:#ddd;
+    border-radius:10px;
+    overflow:hidden;
+    margin-bottom:20px;
+}
+
+.progress {
+    height:100%;
+    width:0%;
+    background:var(--primary);
+    transition:0.4s;
+}
+
+/* QUESTION */
+.question {
+    font-size:22px;
+    margin-bottom:20px;
+}
+
+/* OPTIONS */
+.option {
+    padding:12px;
+    margin:10px 0;
+    background:var(--primary);
+    color:white;
+    border-radius:12px;
+    cursor:pointer;
+    transition:0.3s;
+}
+
+.option:hover {
+    transform:scale(1.05);
+}
+
+/* RESULT CARD */
+.result-card {
+    text-align:center;
+    animation:fade 0.8s ease;
+}
+
+.result-card img {
+    width:120px;
+    margin-bottom:10px;
+}
+
+/* BUTTON */
+button {
+    padding:8px 14px;
+    border:none;
+    border-radius:20px;
+    cursor:pointer;
+}
+
+/* DARK MODE */
+.dark {
+    --bg:#0f172a;
+    --card:#1e293b;
+    --text:#f1f5f9;
+}
+
+.dark body {
+    background:#0f172a;
+}
+
+/* ANIMATION */
+@keyframes fade {
+    from{opacity:0; transform:translateY(10px);}
+    to{opacity:1; transform:translateY(0);}
+}
+</style>
+</head>
+
+<body>
+
+<div class="nav">
+<h2>🧠 Personality Analyzer</h2>
+
+<div class="controls">
+<button onclick="toggleMusic()">🎧</button>
+<button onclick="toggleTheme()">🌙</button>
+</div>
+</div>
+
+<div class="container">
+
+<div class="progress-bar">
+<div class="progress" id="progress"></div>
+</div>
+
+<div id="quiz"></div>
+
+</div>
+
+<!-- Sounds -->
+<audio id="clickSound" src="https://www.soundjay.com/buttons/sounds/button-09.mp3"></audio>
+<audio id="bgMusic" loop src="https://www.soundjay.com/ambient/sounds/forest-ambient-01.mp3"></audio>
+
+<script>
+const questions = [
+{
+q:"How do you handle problems?",
+a:["Analyze deeply","Think creatively","Ask for help","Take risks"]
+},
+{
+q:"Pick a weekend activity:",
+a:["Reading","Drawing","Socializing","Traveling"]
+},
+{
+q:"Your strength?",
+a:["Logic","Imagination","Empathy","Courage"]
+},
+{
+q:"What motivates you?",
+a:["Knowledge","Creativity","Relationships","Adventure"]
+},
+{
+q:"Your ideal environment?",
+a:["Quiet","Artistic","Friendly","Dynamic"]
+}
+];
+
+let current=0;
+let score=[0,0,0,0];
+
+function loadQuestion(){
+let q=questions[current];
+
+document.getElementById("quiz").innerHTML=
+`<div class="question">${q.q}</div>
+${q.a.map((opt,i)=>
+`<div class="option" onclick="select(${i})">${opt}</div>`
+).join("")}`;
+
+updateProgress();
+}
+
+function select(i){
+playSound();
+score[i]++;
+current++;
+
+if(current<questions.length){
+loadQuestion();
+}else{
+showResult();
+}
+}
+
+function updateProgress(){
+let percent=(current/questions.length)*100;
+document.getElementById("progress").style.width=percent+"%";
+}
+
+function showResult(){
+let max=score.indexOf(Math.max(...score));
+
+let data=[
+{
+title:"🧠 Analytical Thinker",
+img:"https://cdn-icons-png.flaticon.com/512/4149/4149670.png",
+desc:"You rely on logic and deep thinking."
+},
+{
+title:"🎨 Creative Mind",
+img:"https://cdn-icons-png.flaticon.com/512/4149/4149680.png",
+desc:"You think outside the box."
+},
+{
+title:"❤️ Empathetic Soul",
+img:"https://cdn-icons-png.flaticon.com/512/4149/4149653.png",
+desc:"You value emotions and people."
+},
+{
+title:"🚀 Adventurous Spirit",
+img:"https://cdn-icons-png.flaticon.com/512/4149/4149696.png",
+desc:"You love risks and excitement."
+}
+];
+
+let r=data[max];
+
+document.getElementById("quiz").innerHTML=
+`<div class="result-card">
+<img src="${r.img}">
+<h2>${r.title}</h2>
+<p>${r.desc}</p>
+<button onclick="restart()">Restart</button>
+</div>`;
+}
+
+function restart(){
+current=0;
+score=[0,0,0,0];
+loadQuestion();
+}
+
+/* SOUND */
+function playSound(){
+let s=document.getElementById("clickSound");
+s.currentTime=0;
+s.play();
+}
+
+/* MUSIC */
+let musicPlaying=false;
+function toggleMusic(){
+let m=document.getElementById("bgMusic");
+if(musicPlaying){
+m.pause();
+}else{
+m.play();
+}
+musicPlaying=!musicPlaying;
+}
+
+/* DARK MODE */
+function toggleTheme(){
+document.body.classList.toggle("dark");
+localStorage.setItem("theme",
+document.body.classList.contains("dark")?"dark":"light");
+}
+
+if(localStorage.getItem("theme")==="dark"){
+document.body.classList.add("dark");
+}
+
+loadQuestion();
+</script>
+
+</body>
+</html>
